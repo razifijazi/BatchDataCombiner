@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Zap, Trash2, PlusCircle, X } from 'lucide-react';
+import { Zap, Trash2, PlusCircle, X, Copy } from 'lucide-react';
+import { showSuccess } from '@/utils/toast';
 
 interface Field {
   id: number;
@@ -78,6 +79,13 @@ const DataCombinerForm: React.FC = () => {
     setOutputData('');
   };
 
+  const handleCopyToClipboard = (data: string) => {
+    if (!data) return;
+    navigator.clipboard.writeText(data).then(() => {
+      showSuccess('Copied to clipboard!');
+    });
+  };
+
   return (
     <div className="container mx-auto p-4 md:p-8">
       <Card className="w-full">
@@ -132,13 +140,24 @@ const DataCombinerForm: React.FC = () => {
 
           <div className="grid gap-2">
             <Label htmlFor="output-data">Combined Output</Label>
-            <Textarea
-              id="output-data"
-              readOnly
-              placeholder="Your combined data will appear here..."
-              value={outputData}
-              className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50"
-            />
+            <div className="relative">
+              <Textarea
+                id="output-data"
+                readOnly
+                placeholder="Your combined data will appear here..."
+                value={outputData}
+                className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50 pr-12"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 h-8 w-8"
+                onClick={() => handleCopyToClipboard(outputData)}
+                disabled={!outputData}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
         <CardFooter>

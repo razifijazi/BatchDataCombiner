@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Wand2, Trash2 } from 'lucide-react';
+import { Wand2, Trash2, Copy } from 'lucide-react';
+import { showSuccess } from '@/utils/toast';
 
 const TitleParserForm: React.FC = () => {
   const [inputData, setInputData] = useState('');
@@ -44,6 +45,13 @@ const TitleParserForm: React.FC = () => {
     setOutputUrls('');
   };
 
+  const handleCopyToClipboard = (data: string) => {
+    if (!data) return;
+    navigator.clipboard.writeText(data).then(() => {
+      showSuccess('Copied to clipboard!');
+    });
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -73,23 +81,45 @@ const TitleParserForm: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="output-titles">Titles</Label>
-            <Textarea
-              id="output-titles"
-              readOnly
-              placeholder="Parsed titles will appear here..."
-              value={outputTitles}
-              className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50"
-            />
+            <div className="relative">
+              <Textarea
+                id="output-titles"
+                readOnly
+                placeholder="Parsed titles will appear here..."
+                value={outputTitles}
+                className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50 pr-12"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 h-8 w-8"
+                onClick={() => handleCopyToClipboard(outputTitles)}
+                disabled={!outputTitles}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="output-urls">URLs</Label>
-            <Textarea
-              id="output-urls"
-              readOnly
-              placeholder="Parsed URLs will appear here..."
-              value={outputUrls}
-              className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50"
-            />
+            <div className="relative">
+              <Textarea
+                id="output-urls"
+                readOnly
+                placeholder="Parsed URLs will appear here..."
+                value={outputUrls}
+                className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50 pr-12"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 h-8 w-8"
+                onClick={() => handleCopyToClipboard(outputUrls)}
+                disabled={!outputUrls}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
