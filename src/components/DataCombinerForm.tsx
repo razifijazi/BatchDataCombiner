@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -8,42 +8,37 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Zap, Trash2, PlusCircle, X, Copy } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
+import { Field } from '@/pages/Index';
 
-interface Field {
-  id: number;
-  label: string;
-  placeholder: string;
-  value: string;
+const INITIAL_FIELD_COUNT = 4;
+
+interface DataCombinerFormProps {
+  fields: Field[];
+  setFields: React.Dispatch<React.SetStateAction<Field[]>>;
+  separator: string;
+  setSeparator: React.Dispatch<React.SetStateAction<string>>;
+  outputData: string;
+  setOutputData: React.Dispatch<React.SetStateAction<string>>;
+  onClear: () => void;
 }
 
-const initialFieldsData: Omit<Field, 'id' | 'value'>[] = [
-  { label: 'Field 1', placeholder: 'Data for field 1...' },
-  { label: 'Field 2', placeholder: 'Data for field 2...' },
-  { label: 'Field 3', placeholder: 'Data for field 3...' },
-  { label: 'Field 4', placeholder: 'Data for field 4...' },
-];
-
-let nextId = initialFieldsData.length;
-
-const createInitialFields = (): Field[] => 
-  initialFieldsData.map((field, index) => ({
-    ...field,
-    id: index,
-    value: '',
-  }));
-
-const DataCombinerForm: React.FC = () => {
-  const [fields, setFields] = useState<Field[]>(createInitialFields());
-  const [separator, setSeparator] = useState(',');
-  const [outputData, setOutputData] = useState('');
-
+const DataCombinerForm: React.FC<DataCombinerFormProps> = ({
+  fields,
+  setFields,
+  separator,
+  setSeparator,
+  outputData,
+  setOutputData,
+  onClear,
+}) => {
   const handleFieldChange = (id: number, value: string) => {
     setFields(fields.map(field => field.id === id ? { ...field, value } : field));
   };
 
   const handleAddField = () => {
+    const newId = fields.length > 0 ? Math.max(...fields.map(f => f.id)) + 1 : INITIAL_FIELD_COUNT;
     const newField: Field = {
-      id: nextId++,
+      id: newId,
       label: `Field ${fields.length + 1}`,
       placeholder: `Data for field ${fields.length + 1}...`,
       value: '',
@@ -74,11 +69,6 @@ const DataCombinerForm: React.FC = () => {
     setOutputData(combinedLines.join('\n'));
   };
 
-  const handleClearAll = () => {
-    setFields(createInitialFields());
-    setOutputData('');
-  };
-
   const handleCopyToClipboard = (data: string) => {
     if (!data) return;
     navigator.clipboard.writeText(data).then(() => {
@@ -101,7 +91,7 @@ const DataCombinerForm: React.FC = () => {
               <div key={field.id} className="grid gap-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor={`field-${field.id}`}>{field.label}</Label>
-                  {field.id >= initialFieldsData.length && (
+                  {field.id >= INITIAL_FIELD_COUNT && (
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveField(field.id)}>
                       <X className="h-4 w-4" />
                     </Button>
@@ -161,7 +151,7 @@ const DataCombinerForm: React.FC = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <Button variant="destructive" onClick={handleClearAll}>
+          <Button variant="destructive" onClick={onClear}>
             <Trash2 className="mr-2 h-4 w-4" /> Clear All & Reset Fields
           </Button>
         </CardFooter>

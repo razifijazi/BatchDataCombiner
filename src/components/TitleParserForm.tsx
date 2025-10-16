@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -8,11 +8,25 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Wand2, Trash2, Copy } from 'lucide-react';
 import { showSuccess } from '@/utils/toast';
 
-const TitleParserForm: React.FC = () => {
-  const [inputData, setInputData] = useState('');
-  const [outputTitles, setOutputTitles] = useState('');
-  const [outputUrls, setOutputUrls] = useState('');
+interface TitleParserFormProps {
+  inputData: string;
+  setInputData: React.Dispatch<React.SetStateAction<string>>;
+  outputTitles: string;
+  setOutputTitles: React.Dispatch<React.SetStateAction<string>>;
+  outputUrls: string;
+  setOutputUrls: React.Dispatch<React.SetStateAction<string>>;
+  onClear: () => void;
+}
 
+const TitleParserForm: React.FC<TitleParserFormProps> = ({
+  inputData,
+  setInputData,
+  outputTitles,
+  setOutputTitles,
+  outputUrls,
+  setOutputUrls,
+  onClear,
+}) => {
   const handleParse = () => {
     const entries = inputData.split('▶️').filter(entry => entry.trim() !== '');
     const titles: string[] = [];
@@ -37,12 +51,6 @@ const TitleParserForm: React.FC = () => {
 
     setOutputTitles(titles.join('\n'));
     setOutputUrls(urls.join('\n'));
-  };
-
-  const handleClear = () => {
-    setInputData('');
-    setOutputTitles('');
-    setOutputUrls('');
   };
 
   const handleCopyToClipboard = (data: string) => {
@@ -124,7 +132,7 @@ const TitleParserForm: React.FC = () => {
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="destructive" onClick={handleClear}>
+        <Button variant="destructive" onClick={onClear}>
           <Trash2 className="mr-2 h-4 w-4" /> Clear All
         </Button>
       </CardFooter>
