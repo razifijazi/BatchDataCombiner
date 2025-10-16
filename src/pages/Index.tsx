@@ -1,4 +1,4 @@
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import { Footer } from "@/components/Footer";
 import DataCombinerForm from "@/components/DataCombinerForm";
 
 const Index = () => {
@@ -8,7 +8,7 @@ const Index = () => {
         <DataCombinerForm />
       </div>
       <div className="pt-8">
-        <MadeWithDyad />
+        <Footer />
       </div>
     </div>
   );
