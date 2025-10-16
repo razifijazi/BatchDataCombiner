@@ -13,14 +13,14 @@ const DataCombinerForm: React.FC = () => {
   const [embedLinks, setEmbedLinks] = useState('');
   const [thumbnailUrls, setThumbnailUrls] = useState('');
   const [categories, setCategories] = useState('');
-  const [separator, setSeparator] = useState('|');
+  const [separator, setSeparator] = useState(',');
   const [outputData, setOutputData] = useState('');
 
   const handleCombineData = () => {
-    const titlesArr = titles.split('\n').filter(t => t.trim() !== '');
-    const embedLinksArr = embedLinks.split('\n').filter(t => t.trim() !== '');
-    const thumbnailUrlsArr = thumbnailUrls.split('\n').filter(t => t.trim() !== '');
-    const categoriesArr = categories.split('\n').filter(t => t.trim() !== '');
+    const titlesArr = titles.split('\n');
+    const embedLinksArr = embedLinks.split('\n');
+    const thumbnailUrlsArr = thumbnailUrls.split('\n');
+    const categoriesArr = categories.split('\n');
 
     const maxLength = Math.max(titlesArr.length, embedLinksArr.length, thumbnailUrlsArr.length, categoriesArr.length);
     if (maxLength === 0) {
@@ -36,7 +36,10 @@ const DataCombinerForm: React.FC = () => {
         thumbnailUrlsArr[i] || '',
         categoriesArr[i] || ''
       ];
-      newEntries.push(entryParts.join(separator));
+      
+      // Filter out empty parts before joining to avoid leading/trailing/double separators
+      const nonEmptyParts = entryParts.filter(part => part.trim() !== '');
+      newEntries.push(nonEmptyParts.join(separator));
     }
 
     setOutputData(newEntries.join('\n'));
@@ -84,7 +87,7 @@ const DataCombinerForm: React.FC = () => {
               <Label htmlFor="separator">Separator</Label>
               <Input
                 id="separator"
-                placeholder="e.g., |, :, -"
+                placeholder="e.g., ,, :, -"
                 value={separator}
                 onChange={(e) => setSeparator(e.target.value)}
                 className="w-full sm:w-48"
