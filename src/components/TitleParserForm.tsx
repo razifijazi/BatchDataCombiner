@@ -9,26 +9,34 @@ import { Wand2, Trash2 } from 'lucide-react';
 
 const TitleParserForm: React.FC = () => {
   const [inputData, setInputData] = useState('');
-  const [outputData, setOutputData] = useState('');
+  const [outputTitles, setOutputTitles] = useState('');
+  const [outputUrls, setOutputUrls] = useState('');
 
   const handleParse = () => {
     const lines = inputData.split('\n');
-    const parsedLines = lines.map(line => {
-      if (line.trim() === '') return '';
+    const titles: string[] = [];
+    const urls: string[] = [];
+    
+    lines.forEach(line => {
+      if (line.trim() === '') return;
       const parts = line.split(' and ');
       if (parts.length === 2) {
-        const title = parts[0].trim();
-        const url = parts[1].trim();
-        return `▶️${title}\n${url}`;
+        titles.push(parts[0].trim());
+        urls.push(parts[1].trim());
+      } else {
+        titles.push(line);
+        urls.push('');
       }
-      return line; // Return original line if format is not as expected
     });
-    setOutputData(parsedLines.join('\n\n'));
+
+    setOutputTitles(titles.join('\n'));
+    setOutputUrls(urls.join('\n'));
   };
 
   const handleClear = () => {
     setInputData('');
-    setOutputData('');
+    setOutputTitles('');
+    setOutputUrls('');
   };
 
   return (
@@ -57,15 +65,27 @@ const TitleParserForm: React.FC = () => {
           </Button>
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="output-data">Parsed Output</Label>
-          <Textarea
-            id="output-data"
-            readOnly
-            placeholder="Your parsed titles will appear here..."
-            value={outputData}
-            className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="output-titles">Titles</Label>
+            <Textarea
+              id="output-titles"
+              readOnly
+              placeholder="Parsed titles will appear here..."
+              value={outputTitles}
+              className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="output-urls">URLs</Label>
+            <Textarea
+              id="output-urls"
+              readOnly
+              placeholder="Parsed URLs will appear here..."
+              value={outputUrls}
+              className="h-64 font-mono text-sm bg-gray-50 dark:bg-gray-900/50"
+            />
+          </div>
         </div>
       </CardContent>
       <CardFooter>
