@@ -13,19 +13,24 @@ const TitleParserForm: React.FC = () => {
   const [outputUrls, setOutputUrls] = useState('');
 
   const handleParse = () => {
-    const lines = inputData.split('\n');
+    const entries = inputData.split('▶️').filter(entry => entry.trim() !== '');
     const titles: string[] = [];
     const urls: string[] = [];
-    
-    lines.forEach(line => {
-      if (line.trim() === '') return;
-      const parts = line.split(' and ');
-      if (parts.length === 2) {
-        titles.push(parts[0].trim());
-        urls.push(parts[1].trim());
-      } else {
-        titles.push(line);
-        urls.push('');
+
+    entries.forEach(entry => {
+      const lines = entry.trim().split('\n').map(line => line.trim()).filter(line => line !== '');
+      if (lines.length > 0) {
+        const lastLine = lines[lines.length - 1];
+        if (lastLine.startsWith('http')) {
+          const url = lines.pop();
+          const title = lines.join(' ');
+          urls.push(url || '');
+          titles.push(title);
+        } else {
+          // No URL found, treat the whole entry as a title
+          titles.push(lines.join(' '));
+          urls.push('');
+        }
       }
     });
 
@@ -44,7 +49,7 @@ const TitleParserForm: React.FC = () => {
       <CardHeader>
         <CardTitle>Title Parser</CardTitle>
         <CardDescription>
-          Paste your data in the format "Title and URL" per line. The tool will format it for you.
+          Paste your data below. Each title should be prefixed with '▶️' and followed by its URL.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
@@ -52,7 +57,7 @@ const TitleParserForm: React.FC = () => {
           <Label htmlFor="input-data">Input Data</Label>
           <Textarea
             id="input-data"
-            placeholder="e.g., KobelMemekHijabSquirtAhh.mp4 and https://videy.tv/s/tYYLZ3Ow"
+            placeholder={`e.g.,\n▶️ KobelMemekHijabSquirtAhh.mp4\nhttps://videy.tv/s/tYYLZ3Ow`}
             value={inputData}
             onChange={(e) => setInputData(e.target.value)}
             className="h-64"
