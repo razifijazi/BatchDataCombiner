@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Footer } from "@/components/Footer";
 import DataCombinerForm from "@/components/DataCombinerForm";
 import TitleParserForm from "@/components/TitleParserForm";
+import LinkChangerForm from "@/components/LinkChangerForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface Field {
@@ -47,13 +48,23 @@ const Index = () => {
     setOutputUrls('');
   };
 
+  // State for LinkChangerForm
+  const [inputLinks, setInputLinks] = useState('');
+  const [outputIframes, setOutputIframes] = useState('');
+
+  const handleLinkChangerClear = () => {
+    setInputLinks('');
+    setOutputIframes('');
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 py-8">
       <div className="w-full max-w-6xl px-4">
         <Tabs defaultValue="combiner" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="combiner">Batch Data Combiner</TabsTrigger>
             <TabsTrigger value="parser">Title Parser</TabsTrigger>
+            <TabsTrigger value="changer">Link Changer</TabsTrigger>
           </TabsList>
           <TabsContent value="combiner">
             <DataCombinerForm 
@@ -75,6 +86,15 @@ const Index = () => {
               outputUrls={outputUrls}
               setOutputUrls={setOutputUrls}
               onClear={handleParserClear}
+            />
+          </TabsContent>
+          <TabsContent value="changer">
+            <LinkChangerForm
+              inputLinks={inputLinks}
+              setInputLinks={setInputLinks}
+              outputIframes={outputIframes}
+              setOutputIframes={setOutputIframes}
+              onClear={handleLinkChangerClear}
             />
           </TabsContent>
         </Tabs>
