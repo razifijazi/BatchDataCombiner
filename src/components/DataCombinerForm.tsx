@@ -6,50 +6,75 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Zap, Trash2 } from 'lucide-react';
+import { Zap, Trash2, PlusCircle, X } from 'lucide-react';
+
+interface Field {
+  id: number;
+  label: string;
+  placeholder: string;
+  value: string;
+}
+
+const initialFieldsData: Omit<Field, 'id' | 'value'>[] = [
+  { label: 'Titles', placeholder: 'Title 1\nTitle 2\nTitle 3' },
+  { label: 'Embed Links', placeholder: 'Link 1\nLink 2\nLink 3' },
+  { label: 'Thumbnail URLs', placeholder: 'URL 1\nURL 2\nURL 3' },
+  { label: 'Categories', placeholder: 'Category 1\nCategory 2\nCategory 3' },
+];
+
+let nextId = initialFieldsData.length;
+
+const createInitialFields = (): Field[] => 
+  initialFieldsData.map((field, index) => ({
+    ...field,
+    id: index,
+    value: '',
+  }));
 
 const DataCombinerForm: React.FC = () => {
-  const [titles, setTitles] = useState('');
-  const [embedLinks, setEmbedLinks] = useState('');
-  const [thumbnailUrls, setThumbnailUrls] = useState('');
-  const [categories, setCategories] = useState('');
+  const [fields, setFields] = useState<Field[]>(createInitialFields());
   const [separator, setSeparator] = useState(',');
   const [outputData, setOutputData] = useState('');
 
-  const handleCombineData = () => {
-    const titlesArr = titles.split('\n');
-    const embedLinksArr = embedLinks.split('\n');
-    const thumbnailUrlsArr = thumbnailUrls.split('\n');
-    const categoriesArr = categories.split('\n');
+  const handleFieldChange = (id: number, value: string) => {
+    setFields(fields.map(field => field.id === id ? { ...field, value } : field));
+  };
 
-    const maxLength = Math.max(titlesArr.length, embedLinksArr.length, thumbnailUrlsArr.length, categoriesArr.length);
+  const handleAddField = () => {
+    const newField: Field = {
+      id: nextId++,
+      label: `Field ${fields.length + 1}`,
+      placeholder: `Data for field ${fields.length + 1}...`,
+      value: '',
+    };
+    setFields([...fields, newField]);
+  };
+
+  const handleRemoveField = (id: number) => {
+    setFields(fields.filter(field => field.id !== id));
+  };
+
+  const handleCombineData = () => {
+    const allLinesByField = fields.map(field => field.value.split('\n'));
+    const maxLength = Math.max(0, ...allLinesByField.map(lines => lines.length));
+
     if (maxLength === 0) {
       setOutputData('');
       return;
     }
 
-    const newEntries = [];
+    const combinedLines = [];
     for (let i = 0; i < maxLength; i++) {
-      const entryParts = [
-        titlesArr[i] || '',
-        embedLinksArr[i] || '',
-        thumbnailUrlsArr[i] || '',
-        categoriesArr[i] || ''
-      ];
-      
-      // Filter out empty parts before joining to avoid leading/trailing/double separators
-      const nonEmptyParts = entryParts.filter(part => part.trim() !== '');
-      newEntries.push(nonEmptyParts.join(separator));
+      const lineParts = allLinesByField.map(lines => lines[i] || '');
+      const nonEmptyParts = lineParts.filter(part => part.trim() !== '');
+      combinedLines.push(nonEmptyParts.join(separator));
     }
 
-    setOutputData(newEntries.join('\n'));
+    setOutputData(combinedLines.join('\n'));
   };
 
   const handleClearAll = () => {
-    setTitles('');
-    setEmbedLinks('');
-    setThumbnailUrls('');
-    setCategories('');
+    setFields(createInitialFields());
     setOutputData('');
   };
 
@@ -59,28 +84,35 @@ const DataCombinerForm: React.FC = () => {
         <CardHeader>
           <CardTitle>Batch Data Combiner</CardTitle>
           <CardDescription>
-            Paste your data into the fields below. Each line in a field corresponds to the same line in other fields.
+            Paste your data into the fields below. Each line corresponds to the same line in other fields. Add or remove fields as needed.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="titles">Titles</Label>
-              <Textarea id="titles" placeholder="Title 1&#10;Title 2&#10;Title 3" value={titles} onChange={(e) => setTitles(e.target.value)} className="h-48" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="embed-links">Embed Links</Label>
-              <Textarea id="embed-links" placeholder="Link 1&#10;Link 2&#10;Link 3" value={embedLinks} onChange={(e) => setEmbedLinks(e.target.value)} className="h-48" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="thumbnail-urls">Thumbnail URLs</Label>
-              <Textarea id="thumbnail-urls" placeholder="URL 1&#10;URL 2&#10;URL 3" value={thumbnailUrls} onChange={(e) => setThumbnailUrls(e.target.value)} className="h-48" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="categories">Categories</Label>
-              <Textarea id="categories" placeholder="Category 1&#10;Category 2&#10;Category 3" value={categories} onChange={(e) => setCategories(e.target.value)} className="h-48" />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {fields.map(field => (
+              <div key={field.id} className="grid gap-2">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor={`field-${field.id}`}>{field.label}</Label>
+                  {fields.length > 1 && (
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveField(field.id)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <Textarea
+                  id={`field-${field.id}`}
+                  placeholder={field.placeholder}
+                  value={field.value}
+                  onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                  className="h-48"
+                />
+              </div>
+            ))}
           </div>
+          
+          <Button variant="outline" onClick={handleAddField}>
+            <PlusCircle className="mr-2 h-4 w-4" /> Add New Field
+          </Button>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <div className="grid gap-2 w-full sm:w-auto">
@@ -111,7 +143,7 @@ const DataCombinerForm: React.FC = () => {
         </CardContent>
         <CardFooter>
           <Button variant="destructive" onClick={handleClearAll}>
-            <Trash2 className="mr-2 h-4 w-4" /> Clear All
+            <Trash2 className="mr-2 h-4 w-4" /> Clear All & Reset Fields
           </Button>
         </CardFooter>
       </Card>
