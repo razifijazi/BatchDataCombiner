@@ -6,53 +6,47 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { PlusCircle, Trash2, X } from 'lucide-react';
-
-interface Field {
-  id: number;
-  value: string;
-  placeholder: string;
-}
-
-let nextId = 5; // Start after initial fields
-
-const initialFields: Field[] = [
-  { id: 1, value: '', placeholder: 'Title' },
-  { id: 2, value: '', placeholder: 'Embed Link' },
-  { id: 3, value: '', placeholder: 'Thumbnail URL' },
-  { id: 4, value: '', placeholder: 'Category' },
-];
+import { Zap, Trash2 } from 'lucide-react';
 
 const DataCombinerForm: React.FC = () => {
-  const [fields, setFields] = useState<Field[]>(initialFields);
+  const [titles, setTitles] = useState('');
+  const [embedLinks, setEmbedLinks] = useState('');
+  const [thumbnailUrls, setThumbnailUrls] = useState('');
+  const [categories, setCategories] = useState('');
   const [separator, setSeparator] = useState('|');
   const [outputData, setOutputData] = useState('');
 
-  const handleFieldValueChange = (id: number, newValue: string) => {
-    setFields(fields.map(field => field.id === id ? { ...field, value: newValue } : field));
-  };
+  const handleCombineData = () => {
+    const titlesArr = titles.split('\n').filter(t => t.trim() !== '');
+    const embedLinksArr = embedLinks.split('\n').filter(t => t.trim() !== '');
+    const thumbnailUrlsArr = thumbnailUrls.split('\n').filter(t => t.trim() !== '');
+    const categoriesArr = categories.split('\n').filter(t => t.trim() !== '');
 
-  const handleAddField = () => {
-    setFields([...fields, { id: nextId++, value: '', placeholder: `Field ${fields.length + 1}` }]);
-  };
-
-  const handleRemoveField = (id: number) => {
-    setFields(fields.filter(field => field.id !== id));
-  };
-
-  const handleAddEntry = () => {
-    const newEntry = fields.map(field => field.value).join(separator);
-    if (newEntry.replace(new RegExp(`\\${separator}`, 'g'), '').trim() === '') {
-      return; // Don't add empty entries
+    const maxLength = Math.max(titlesArr.length, embedLinksArr.length, thumbnailUrlsArr.length, categoriesArr.length);
+    if (maxLength === 0) {
+      setOutputData('');
+      return;
     }
-    setOutputData(prev => prev ? `${prev}\n${newEntry}` : newEntry);
 
-    // Clear input fields after adding
-    setFields(fields.map(field => ({ ...field, value: '' })));
+    const newEntries = [];
+    for (let i = 0; i < maxLength; i++) {
+      const entryParts = [
+        titlesArr[i] || '',
+        embedLinksArr[i] || '',
+        thumbnailUrlsArr[i] || '',
+        categoriesArr[i] || ''
+      ];
+      newEntries.push(entryParts.join(separator));
+    }
+
+    setOutputData(newEntries.join('\n'));
   };
 
   const handleClearAll = () => {
-    setFields(initialFields);
+    setTitles('');
+    setEmbedLinks('');
+    setThumbnailUrls('');
+    setCategories('');
     setOutputData('');
   };
 
@@ -60,47 +54,44 @@ const DataCombinerForm: React.FC = () => {
     <div className="container mx-auto p-4 md:p-8">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Customizable Data Combiner</CardTitle>
+          <CardTitle>Batch Data Combiner</CardTitle>
           <CardDescription>
-            Add, remove, and fill in your own fields. Combine them into a list with a custom separator.
+            Paste your data into the fields below. Each line in a field corresponds to the same line in other fields.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
-          <div className="space-y-4">
-            <Label>Input Fields</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {fields.map((field) => (
-                <div key={field.id} className="flex items-center gap-2">
-                  <Input
-                    placeholder={field.placeholder}
-                    value={field.value}
-                    onChange={(e) => handleFieldValueChange(field.id, e.target.value)}
-                  />
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveField(field.id)} disabled={fields.length <= 1}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="titles">Titles</Label>
+              <Textarea id="titles" placeholder="Title 1&#10;Title 2&#10;Title 3" value={titles} onChange={(e) => setTitles(e.target.value)} className="h-48" />
             </div>
-            <Button variant="outline" size="sm" onClick={handleAddField}>
-              <PlusCircle className="mr-2 h-4 w-4" /> Add Field
-            </Button>
+            <div className="grid gap-2">
+              <Label htmlFor="embed-links">Embed Links</Label>
+              <Textarea id="embed-links" placeholder="Link 1&#10;Link 2&#10;Link 3" value={embedLinks} onChange={(e) => setEmbedLinks(e.target.value)} className="h-48" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="thumbnail-urls">Thumbnail URLs</Label>
+              <Textarea id="thumbnail-urls" placeholder="URL 1&#10;URL 2&#10;URL 3" value={thumbnailUrls} onChange={(e) => setThumbnailUrls(e.target.value)} className="h-48" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="categories">Categories</Label>
+              <Textarea id="categories" placeholder="Category 1&#10;Category 2&#10;Category 3" value={categories} onChange={(e) => setCategories(e.target.value)} className="h-48" />
+            </div>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="separator">Separator</Label>
-            <Input
-              id="separator"
-              placeholder="e.g., |, :, -"
-              value={separator}
-              onChange={(e) => setSeparator(e.target.value)}
-              className="w-full sm:w-64"
-            />
-          </div>
-          
-          <div className="flex justify-center">
-             <Button onClick={handleAddEntry} size="lg">
-                <PlusCircle className="mr-2 h-4 w-4" /> Add to List
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <div className="grid gap-2 w-full sm:w-auto">
+              <Label htmlFor="separator">Separator</Label>
+              <Input
+                id="separator"
+                placeholder="e.g., |, :, -"
+                value={separator}
+                onChange={(e) => setSeparator(e.target.value)}
+                className="w-full sm:w-48"
+              />
+            </div>
+            <Button onClick={handleCombineData} size="lg" className="w-full sm:w-auto mt-4 sm:mt-0 self-end">
+                <Zap className="mr-2 h-4 w-4" /> Combine Data
             </Button>
           </div>
 
@@ -117,7 +108,7 @@ const DataCombinerForm: React.FC = () => {
         </CardContent>
         <CardFooter>
           <Button variant="destructive" onClick={handleClearAll}>
-            <Trash2 className="mr-2 h-4 w-4" /> Clear All & Reset Fields
+            <Trash2 className="mr-2 h-4 w-4" /> Clear All
           </Button>
         </CardFooter>
       </Card>
