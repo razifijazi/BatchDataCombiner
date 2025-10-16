@@ -16,10 +16,10 @@ interface Field {
 }
 
 const initialFieldsData: Omit<Field, 'id' | 'value'>[] = [
-  { label: 'Titles', placeholder: 'Title 1\nTitle 2\nTitle 3' },
-  { label: 'Embed Links', placeholder: 'Link 1\nLink 2\nLink 3' },
-  { label: 'Thumbnail URLs', placeholder: 'URL 1\nURL 2\nURL 3' },
-  { label: 'Categories', placeholder: 'Category 1\nCategory 2\nCategory 3' },
+  { label: 'Field 1', placeholder: 'Data for field 1...' },
+  { label: 'Field 2', placeholder: 'Data for field 2...' },
+  { label: 'Field 3', placeholder: 'Data for field 3...' },
+  { label: 'Field 4', placeholder: 'Data for field 4...' },
 ];
 
 let nextId = initialFieldsData.length;
@@ -93,7 +93,7 @@ const DataCombinerForm: React.FC = () => {
               <div key={field.id} className="grid gap-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor={`field-${field.id}`}>{field.label}</Label>
-                  {fields.length > 1 && (
+                  {field.id >= initialFieldsData.length && (
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveField(field.id)}>
                       <X className="h-4 w-4" />
                     </Button>
